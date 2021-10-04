@@ -4,7 +4,7 @@ Multiple Tools that can be used from CLI to help android devs life
 ## About this project
 This project will be implemented in these submodules:
 * utils - broad helpers for other modules
-* terminal tables - a helper for building content aware tables for monospace text
+* tables builder - a helper for building content aware tables for monospace text
 * local shell - a simple wrapper for local shell to handle communication and forking processes
 * droid shell - a wrapper for 'adb shell'
 * droid file sync - a tool to sync remote files on android
