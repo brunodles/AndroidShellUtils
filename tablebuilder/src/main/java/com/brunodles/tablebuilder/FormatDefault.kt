@@ -10,8 +10,10 @@ enum class FormatDefault : Format {
 
         override fun headerDivider(size: Int, direction: ColumnDirection): String =
             createString('-', size)
+
         override fun divider(size: Int): String =
             createString('-', size)
+
         override fun dividers(sizes: List<String>): String =
             sizes.joinToString(" | ")
 
@@ -22,19 +24,22 @@ enum class FormatDefault : Format {
         override val isHeaderDividerRowEnabled: Boolean = true
     },
     markdown {
+        private val minDashesOnDivider = 3
         override fun headerCell(content: String): String = content
         override fun headerLine(content: List<String>): String =
             "| " + content.joinToString(" | ") + " |"
 
         override fun headerDivider(size: Int, direction: ColumnDirection): String =
             when (direction) {
-                ColumnDirection.left -> ":".padEnd(size, '-')
-                ColumnDirection.center -> ":" + createString('-', size - 2) + ":"
-                ColumnDirection.right -> ":".padStart(size, '-')
+                ColumnDirection.left -> ":".padEnd(size.coerceAtLeast(minDashesOnDivider), '-')
+                ColumnDirection.center -> ":" + createString('-', (size - 2).coerceAtLeast(minDashesOnDivider)) + ":"
+                ColumnDirection.right -> ":".padStart(size.coerceAtLeast(minDashesOnDivider), '-')
                 else -> createString('-', size)
             }
+
         override fun divider(size: Int): String =
             createString('-', size)
+
         override fun dividers(sizes: List<String>): String =
             "| " + sizes.joinToString(" | ") + " |"
 
@@ -52,6 +57,7 @@ enum class FormatDefault : Format {
 
         override fun headerDivider(size: Int, direction: ColumnDirection): String =
             createString('-', size)
+
         override fun divider(size: Int): String =
             createString('-', size)
 

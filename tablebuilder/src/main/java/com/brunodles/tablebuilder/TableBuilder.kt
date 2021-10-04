@@ -86,6 +86,12 @@ class TableBuilder(private val tableFormat: Format = FormatDefault.simple) {
         columns.forEachIndexed { index, columnData ->
             sizes[index] = columnData.name.length
         }
+        if (tableFormat.isHeaderDividerRowEnabled) {
+            columns.mapIndexed { index, columnData ->
+                val headerDivider = tableFormat.headerDivider(sizes[index] ?: 0, columnData.columnDirection)
+                sizes[index] = max(sizes[index] ?: 0, headerDivider.length)
+            }
+        }
         rows.forEach { cells ->
             cells.forEachIndexed { index, cell ->
                 sizes[index] = max(sizes[index] ?: 0, cell.length)
