@@ -68,12 +68,12 @@ class SampleTest {
             .build()
 
         val expected = """
-            | col1 | col2 | col3 |
-            | :--- | :--: | ---: |
-            | r1   |  r2  |   r3 |
-            | r1   |  r2  |   r3 |
-            | ---- | ---- | ---- |
-            | f1   |  f2  |   f3 |
+            | col1 |  col2 | col3 |
+            | :--- | :---: | ---: |
+            | r1   |   r2  |   r3 |
+            | r1   |   r2  |   r3 |
+            | ---- | ----- | ---- |
+            | f1   |   f2  |   f3 |
             
         """.trimIndent()
         assertEquals(expected, result)
