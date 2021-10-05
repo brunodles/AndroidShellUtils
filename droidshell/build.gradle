@@ -39,7 +39,6 @@ test {
 jar {
     manifest {
         attributes(
-//                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
                 'Class-Path':
                         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) },
                 'Main-Class': mainClassName
@@ -49,7 +48,6 @@ jar {
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
-//    from configurations.compile
     into ''
 }
 
