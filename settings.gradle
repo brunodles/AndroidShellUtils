@@ -2,5 +2,6 @@ rootProject.name = 'AndroidShellUtils'
 include 'utils'
 include 'tablebuilder'
 include 'shell'
-include 'adbshell'
+include 'shelladbwrapper'
+include 'droidshell'
 
