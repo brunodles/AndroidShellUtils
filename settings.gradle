@@ -5,4 +5,5 @@ include 'shell'
 include 'shelladbwrapper'
 include 'droidshell'
 include 'droidfilesync'
+include 'droiddevice'
 
