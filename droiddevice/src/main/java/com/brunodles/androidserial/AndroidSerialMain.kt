@@ -6,6 +6,7 @@ import com.brunodles.androidserial.Device.Companion.serialEqualsTo
 import com.brunodles.androidserial.Device.Companion.updateSelection
 import com.brunodles.androidserial.gateway.AdbWrapper
 import com.brunodles.androidserial.gateway.DatabaseGateway
+import com.brunodles.tablebuilder.TableBuilder
 import com.github.ajalt.clikt.completion.CompletionCandidates
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
@@ -96,7 +97,7 @@ class ListDevices(val dependencies: Dependencies) : CliktCommand(
 ) {
     override fun run() {
         println("List devices")
-        val tableBuilder = TerminalTableBuilder()
+        val tableBuilder = TableBuilder()
                 .columns {
                     add("Alias")
                     add("Serial")
