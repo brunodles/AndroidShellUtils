@@ -8,7 +8,7 @@ This project will be implemented in these submodules:
 * [x] shell - library wrapper around native shell app
 * [x] shell adb wrapper - library that wraps around 'adb shell' using 'shell' module
 * [x] droid shell - application for 'shell adb wrapper'
-* [ ] droid file sync - a tool to sync remote files on android
+* [x] droid file sync - a tool to sync remote files on android
 * [ ] droid device - a tool to listen to connected devices, like 'adb devices'
 * [ ] local script evaluator that allows to send commands directly to 'adb shell run-as'
 
