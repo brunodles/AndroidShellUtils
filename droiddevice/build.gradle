@@ -18,6 +18,7 @@ repositories {
 }
 
 dependencies {
+    implementation project(":tablebuilder")
     compile "org.jetbrains.kotlin:kotlin-stdlib"
 
     compile 'com.android.ddmlib:ddmlib:r16'
