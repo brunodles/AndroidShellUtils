@@ -6,5 +6,5 @@ include 'shelladbwrapper'
 include 'droidshell'
 include 'droidfilesync'
 include 'droiddevice'
-include 'json_query'
+include 'file_query'
 
