@@ -1,12 +1,10 @@
 plugins {
     id 'java'
-    id 'application'
     id 'org.jetbrains.kotlin.jvm' version '1.5.10'
 }
 
-group 'com.bruondles.json_query'
+group 'com.bruondles.file_query'
 version '1.0-SNAPSHOT'
-mainClassName = 'com.brunodles.json_query.JsonQueryMainKt'
 
 sourceCompatibility = 1.8
 compileKotlin { kotlinOptions.jvmTarget = "1.8" }
@@ -14,7 +12,6 @@ compileTestKotlin { kotlinOptions.jvmTarget = "1.8" }
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
@@ -30,14 +27,14 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
-jar {
+task fatJar(type: Jar) {
     manifest {
-        attributes(
-                'Class-Path':
-                        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) },
-                'Main-Class': 'com.brunodles.json_query.JsonQueryMainKt'
-        )
+        attributes 'Main-Class': mainClassName
     }
-    from configurations.compile
-    into ''
+    archiveClassifier = "all"
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
 }

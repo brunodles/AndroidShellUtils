@@ -1,4 +1,4 @@
-package com.brunodles.json_query
+package com.brunodles.file_query
 
 import java.io.File
 

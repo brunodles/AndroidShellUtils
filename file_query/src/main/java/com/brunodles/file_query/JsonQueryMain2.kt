@@ -1,7 +1,7 @@
-package com.brunodles.json_query
+package com.brunodles.file_query
 
-import com.brunodles.json_query.ExtraFunctions.present
-import com.brunodles.json_query.ExtraFunctions.println
+import com.brunodles.file_query.ExtraFunctions.present
+import com.brunodles.file_query.ExtraFunctions.println
 import com.brunodles.tablebuilder.ColumnDirection.right
 import java.io.File
 

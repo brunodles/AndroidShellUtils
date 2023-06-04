@@ -1,4 +1,4 @@
-package com.brunodles.json_query
+package com.brunodles.file_query
 
 import com.brunodles.tablebuilder.FormatDefault
 import com.brunodles.tablebuilder.TableBuilder

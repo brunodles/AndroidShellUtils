@@ -1,9 +1,6 @@
-package com.brunodles.json_query
+package com.brunodles.file_query
 
-import com.brunodles.tablebuilder.FormatDefault
-import com.brunodles.tablebuilder.TableBuilder
 import com.google.gson.Gson
-import com.google.gson.JsonObject
 import java.io.File
 
 class JsonDatabase(

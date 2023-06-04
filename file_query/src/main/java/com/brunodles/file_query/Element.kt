@@ -1,4 +1,4 @@
-package com.brunodles.json_query
+package com.brunodles.file_query
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
