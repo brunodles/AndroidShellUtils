@@ -4,7 +4,10 @@ plugins {
 }
 
 group 'com.bruondles.file_query'
-version '1.0-SNAPSHOT'
+ext.artifactId = "file_query"
+version = "1.0.0"
+
+apply from: "$rootDir/gradle/local_publish.gradle"
 
 sourceCompatibility = 1.8
 compileKotlin { kotlinOptions.jvmTarget = "1.8" }
@@ -28,9 +31,6 @@ dependencies {
 }
 
 task fatJar(type: Jar) {
-    manifest {
-        attributes 'Main-Class': mainClassName
-    }
     archiveClassifier = "all"
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
