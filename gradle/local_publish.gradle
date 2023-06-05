@@ -1,0 +1,41 @@
+project.apply plugin: 'maven-publish'
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            if (project.ext.find("version") != null) {
+                version = project.ext.find("version")
+            }
+            if (project.ext.find("artifactId") != null) {
+                artifactId = project.ext.find("artifactId")
+            }
+        }
+    }
+
+//    repositories {
+//        maven {
+//            name = 'internal'
+//            url = "$rootProject.projectDir/.build-repo"
+//        }
+//    }
+}
+
+tasks.findByName("publish").dependsOn("publishToMavenLocal")
+tasks.findByName("build").finalizedBy("publish", "publishToMavenLocal")
