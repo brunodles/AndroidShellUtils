@@ -1,17 +1,12 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.10'
+    id 'org.jetbrains.kotlin.jvm'
     id 'application'
 }
-
 
 group 'com.bruondles.droidfilesync'
 version '1.0.0'
 mainClassName = 'com.brunodles.droidfilesync.SyncToolMainKt'
-
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     implementation project(":utils")

@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.10'
+    id 'org.jetbrains.kotlin.jvm'
 }
 
 group 'com.brunodles.table_builder'
@@ -8,10 +8,6 @@ ext.artifactId = "table_builder"
 version = "1.0.0"
 
 apply from: "$rootDir/gradle/local_publish.gradle"
-
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
