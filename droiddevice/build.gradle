@@ -17,7 +17,8 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib"
 
     compile 'com.android.ddmlib:ddmlib:r16'
-    compile 'com.malinskiy:adam:0.2.4'
+    // This dependency could support everything directly, no need to parse from terminals
+//    compile 'com.malinskiy:adam:0.2.4'
 
     compile "com.github.ajalt.clikt:clikt:3.0.1"
 
