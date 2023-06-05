@@ -1,8 +1,7 @@
 package com.brunodles.file_query
 
-import com.brunodles.file_query.ExtraFunctions.present
-import com.brunodles.file_query.ExtraFunctions.println
 import com.brunodles.tablebuilder.ColumnDirection.right
+import com.brunodles.tablebuilder.FormatDefault
 import java.io.File
 
 object JsonQueryMain2 {
@@ -29,16 +28,17 @@ object JsonQueryMain2 {
 //                    it["enabled"] eq true
                 field["name"] contains "card"
             }
-        }.present {
-            add("key")
-            add("name")
-            add("imagesCount", right)
-            add("pinCount", right)
-            add("realPinCount", right)
-            add("enabled")
-            add("lastChange")
-            add("file")
-        }.println()
+            tablePresentation(format = FormatDefault.markdown) {
+                add("key")
+                add("name")
+                add("imagesCount", right)
+                add("pinCount", right)
+                add("realPinCount", right)
+                add("enabled")
+                add("lastChange")
+                add("file")
+            }
+        }
     }
 }
 
