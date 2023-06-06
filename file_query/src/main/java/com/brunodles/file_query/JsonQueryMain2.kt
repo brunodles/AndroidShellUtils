@@ -13,19 +13,18 @@ object JsonQueryMain2 {
         )
 
         database.newQuery {
-            select(
-                { field["key"] },
-                { field["name"] },
-                { field["imagesCount"] },
-                { field["pinCount"] },
-                { field["pins"].count() },
-                { field["enabled"] },
-                { field["lastChange"] },
-                { file }
-            )
+            select {
+                field("key")
+                field("name")
+                field("imagesCount")
+                field("pinCount")
+                field("pins") { count() }
+                field("enabled")
+                field("lastChange")
+                file()
+            }
             from { file.absolutePath.contains("boards") }
             where {
-//                    it["enabled"] eq true
                 field["name"] contains "card"
             }
             tablePresentation(format = FormatDefault.markdown) {

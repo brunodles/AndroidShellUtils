@@ -5,7 +5,9 @@ import com.brunodles.file_query.ExtraFunctions.println
 import com.brunodles.tablebuilder.FormatDefault
 import com.brunodles.tablebuilder.TableBuilder
 import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import java.io.File
 
 class QueryBuilder(
@@ -15,14 +17,19 @@ class QueryBuilder(
     private val gson: Gson = jsonDatabase.gson
 
     /** [toString] will be used to get the value from this return */
-    private var selectFunctions: List<FileQueryContext.() -> Any?> = listOf()
+    private var selectFunction: (SelectFieldContext.() -> Unit)? = null
 
+    /** filter to detect if the file matches a *table* */
     private var fromFilter: FileQueryContext.() -> Boolean = { true }
+
+    /** filter to detect if the content */
     private var whereFunction: FileQueryContext.() -> Boolean = { true }
+
+    /** prints the result */
     private var presentation: ((List<List<String>>) -> String)? = null
 
-    fun select(vararg functions: FileQueryContext.() -> Any?): QueryBuilder {
-        selectFunctions = functions.toList()
+    fun select(function: SelectFieldContext.() -> Unit): QueryBuilder {
+        selectFunction = function
         return this
     }
 
@@ -40,9 +47,22 @@ class QueryBuilder(
         val result = jsonDatabase.rootDir
             .walk()
             .filter { it.isFile }
-            .map { file -> FileQueryContext(file, Element(gson.fromJson(file.readText(), JsonObject::class.java))) }
+            .mapNotNull { file ->
+                val fileText = file.readText()
+                GSON_CLASSES.firstNotNullOfOrNull { classType ->
+                    try {
+                        Element(gson.fromJson(fileText, classType))
+                    } catch (_: Exception) {
+                        null
+                    }
+                }?.let { element -> FileQueryContext(file, element) }
+            }
             .filter { context -> fromFilter(context) && whereFunction(context) }
-            .map { context -> selectFunctions.map { f -> f(context)?.toString() ?: "null" } }
+            .map { context ->
+                val selectFieldContext = SelectFieldContext(context.file, context.field)
+                selectFunction?.invoke(selectFieldContext) ?: throw IllegalArgumentException("The 'select' is missing.")
+                selectFieldContext.result
+            }
             .toList()
         presentation?.let {
             result
@@ -52,19 +72,47 @@ class QueryBuilder(
         return result
     }
 
+    @JvmOverloads
     fun tablePresentation(
         format: FormatDefault = FormatDefault.simple,
         columnsBlock: TableBuilder.ColumnBlock.() -> Unit,
     ) {
-        presentation = {data ->
+        presentation = { data ->
             data.present(format, columnsBlock)
-
         }
     }
 
     data class FileQueryContext(
         val file: File,
         val field: Element<*>,
+    )
+
+    data class SelectFieldContext(
+        private val file: File,
+        private val field: Element<*>,
     ) {
+        internal val result = mutableListOf<String>()
+
+        @JvmOverloads
+        fun field(key: String, function: Element<*>.() -> Any? = { this }) {
+            add(function(field[key]))
+        }
+
+        @JvmOverloads
+        fun file(function: File.() -> Any? = { this }) {
+            add(function(file))
+        }
+
+        fun add(content: Any?) {
+            result += content?.toString() ?: "null"
+        }
+    }
+
+    companion object {
+        private val GSON_CLASSES = listOf(
+            JsonObject::class.java,
+            JsonArray::class.java,
+            JsonPrimitive::class.java,
+        )
     }
 }
