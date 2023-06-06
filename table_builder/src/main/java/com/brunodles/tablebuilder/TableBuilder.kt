@@ -2,7 +2,11 @@ package com.brunodles.tablebuilder
 
 import kotlin.math.max
 
-class TableBuilder(private val tableFormat: Format = FormatDefault.simple) {
+class TableBuilder
+@JvmOverloads
+constructor(
+    private val tableFormat: Format = FormatDefault.simple
+) {
     private val columns = mutableListOf<ColumnData>()
     private val rows = mutableListOf<List<String>>()
     private val footer = mutableListOf<List<String>>()
@@ -111,6 +115,7 @@ class TableBuilder(private val tableFormat: Format = FormatDefault.simple) {
     )
 
     interface ColumnBlock {
+        fun add(name: String) = add(name, ColumnDirection.left)
         fun add(name: String, direction: ColumnDirection = ColumnDirection.left)
     }
 
@@ -121,6 +126,7 @@ class TableBuilder(private val tableFormat: Format = FormatDefault.simple) {
     }
 
     private class ColumnBlockImpl(private val builder: TableBuilder) : ColumnBlock {
+
         override fun add(name: String, direction: ColumnDirection) {
             builder.columns.add(
                 ColumnData(
@@ -133,15 +139,12 @@ class TableBuilder(private val tableFormat: Format = FormatDefault.simple) {
 
     private class RowBlockImpl : RowBlock {
         val cells = mutableListOf<String>()
-        override fun add(text: String) {
-            cells.add(text)
+        override fun add(value: String) {
+            cells.add(value)
         }
 
         override fun skip() {
             cells.add("")
         }
-    }
-
-    companion object {
     }
 }
