@@ -1,0 +1,54 @@
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'application'
+}
+
+group 'com.bruondles.file_query'
+ext.artifactId = "groovy_interpreter"
+version '1.0.0'
+mainClassName = 'com.brunodles.file_query_interpreter.GroovyInterpreter'
+
+sourceCompatibility = 1.8
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(":file_query")
+
+    // Groovy Engine
+    implementation 'org.codehaus.groovy:groovy-all:3.0.17'
+
+    // Js Engine
+//    implementation 'org.mozilla:rhino:1.7.10'
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation "io.mockk:mockk:1.8.13"
+}
+
+//jar {
+//    manifest {
+//        attributes(
+//                'Class-Path':
+//                        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) },
+//                'Main-Class': mainClassName
+//        )
+//    }
+//
+//    from {
+//        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+//    }
+//    into ''
+//}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    archiveClassifier = "all"
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
