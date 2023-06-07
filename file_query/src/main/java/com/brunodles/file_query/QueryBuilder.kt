@@ -59,8 +59,9 @@ class QueryBuilder(
             }
             .filter { context -> fromFilter(context) && whereFunction(context) }
             .map { context ->
-                val selectFieldContext = SelectFieldContext(context.file, context.field)
-                selectFunction?.invoke(selectFieldContext) ?: throw IllegalArgumentException("The 'select' is missing.")
+                val selectFieldContext = SelectFieldContext(context)
+                selectFunction?.invoke(selectFieldContext)
+                        ?: throw IllegalArgumentException("The 'select' is missing.")
                 selectFieldContext.result
             }
             .toList()
@@ -85,13 +86,16 @@ class QueryBuilder(
     data class FileQueryContext(
         val file: File,
         val field: Element<*>,
-    )
+    ) {
+        fun field(key: String): Element<*> = field[key]
+    }
 
     data class SelectFieldContext(
-        private val file: File,
-        private val field: Element<*>,
+        private val fileQueryContext: FileQueryContext
     ) {
         internal val result = mutableListOf<String>()
+        private val field = fileQueryContext.field
+        private val file = fileQueryContext.file
 
         @JvmOverloads
         fun field(key: String, function: Element<*>.() -> Any? = { this }) {
@@ -101,6 +105,14 @@ class QueryBuilder(
         @JvmOverloads
         fun file(function: File.() -> Any? = { this }) {
             add(function(file))
+        }
+
+        fun dateFormat(key: String, format: String) {
+            add(ExtraFunctions.dateFormat(field[key], format))
+        }
+
+        fun func(function: FileQueryContext.() -> Any) {
+            add(function(fileQueryContext))
         }
 
         fun add(content: Any?) {
