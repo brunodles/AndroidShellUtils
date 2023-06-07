@@ -99,5 +99,7 @@ class Element<T : Any?>(
         }.let { Element(it) }
     }
 
+    fun isNull() : Boolean = element == null
+
     private fun elementClassName(): String = element?.let { it::class.java.simpleName } ?: "null"
 }
