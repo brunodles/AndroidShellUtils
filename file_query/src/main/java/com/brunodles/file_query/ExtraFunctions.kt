@@ -8,6 +8,9 @@ import java.util.*
 object ExtraFunctions {
 
     fun dateFormat(element: Element<*>, format: String): Element<String> {
+        if (element.isNull()) {
+            return Element("null")
+        }
         val sdf = SimpleDateFormat(format)
         return Element(sdf.format(Date(element.asLong())))
     }
