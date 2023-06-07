@@ -112,7 +112,10 @@ class QueryBuilder(
         }
 
         @JvmOverloads
-        fun file(function: File.() -> Any? = { this }, named: String = "file") {
+        fun file(named: String = "file", function: File.() -> Any? = { this }) {
+            add(named,function(file))
+        }
+        fun file(function: File.() -> Any? = { this }, named: String) {
             add(named,function(file))
         }
 
@@ -125,7 +128,7 @@ class QueryBuilder(
         fun func(named: String = "func", function: FileQueryContext.() -> Any) {
             add(named, function(fileQueryContext))
         }
-        fun func(function: FileQueryContext.() -> Any, named: String = "func") {
+        fun func(function: FileQueryContext.() -> Any, named: String) {
             add(named, function(fileQueryContext))
         }
 
