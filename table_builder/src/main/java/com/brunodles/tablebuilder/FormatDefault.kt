@@ -23,12 +23,11 @@ enum class FormatDefault : Format {
             override fun line(content: List<String>): String =
                 "| " + content.joinToString(" | ") + " |"
             override fun cell(content: String, size: Int, direction: ColumnDirection): String=
-                    content.withSize(size, direction)
+                content.withSize(size, direction)
         }
         override val headerFormat: Format.ContentFormat = contentFormat
-        override val headerDividerFormat: Format.ContentFormat?= object : Format.ContentFormat {
-            override fun line(content: List<String>): String =
-                "| " + content.joinToString(" | ") + " |"
+        override val headerDividerFormat: Format.ContentFormat? = object : Format.ContentFormat {
+            override fun line(content: List<String>): String = contentFormat.line(content)
             override fun cell(content: String, size: Int, direction: ColumnDirection): String =
                 when (direction) {
                     ColumnDirection.left -> ":".padEnd(size.coerceAtLeast(minDashesOnDivider), '-')
@@ -39,9 +38,8 @@ enum class FormatDefault : Format {
         }
         override val bodyFormat: Format.ContentFormat = contentFormat
         override val footerDivider: Format.ContentFormat? = object : Format.ContentFormat {
-            override fun line(content: List<String>): String =
-                "| " + content.joinToString(" | ") + " |"
-            override fun cell(content: String, size: Int, direction: ColumnDirection): String=
+            override fun line(content: List<String>): String = contentFormat.line(content)
+            override fun cell(content: String, size: Int, direction: ColumnDirection): String =
                 createString('=', size)
         }
         override val footerFormat: Format.ContentFormat? = contentFormat
