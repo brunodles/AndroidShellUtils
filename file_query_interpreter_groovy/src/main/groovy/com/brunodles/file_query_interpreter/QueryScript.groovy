@@ -29,14 +29,4 @@ abstract class QueryScript extends Script {
     def tablePresentation(Closure<String> closure) {
         tablePresentationClosure = closure
     }
-
-    @Override
-    Object run() {
-    }
-
-    static class TablePresentation {
-        def add(String name) {
-            println "  $name"
-        }
-    }
 }

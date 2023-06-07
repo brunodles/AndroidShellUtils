@@ -14,6 +14,8 @@ class GroovyInterpreter {
         def defaultImports = """
             import static com.brunodles.tablebuilder.ColumnDirection.*
             import static com.brunodles.tablebuilder.FormatDefault.*
+            import static com.brunodles.file_query.ExtraFunctions.*
+            import com.brunodles.tablebuilder.FormatDefault
         """.stripIndent()
 
         def workingDir = new File("./")
