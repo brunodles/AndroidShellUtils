@@ -5,12 +5,16 @@ import kotlin.math.max
 class TableBuilder
 @JvmOverloads
 constructor(
-    private val tableFormat: Format = FormatDefault.simple
+        private val tableFormat: Format = FormatDefault.simple
 ) {
-    private val columns = mutableListOf<ColumnData>()
+    private val headers = mutableListOf<ColumnData>()
     private val rows = mutableListOf<List<String>>()
-    private val footer = mutableListOf<List<String>>()
+    private val footers = mutableListOf<List<String>>()
 
+    /** Set up the Headers for the table. Same method as [columns] */
+    fun headers(columnsBlock: ColumnBlock.() -> Unit): TableBuilder = columns(columnsBlock)
+
+    /** Set up the Headers for the table. Same method as [headers] */
     fun columns(columnsBlock: ColumnBlock.() -> Unit): TableBuilder {
         columnsBlock(ColumnBlockImpl(this))
         return this
@@ -26,7 +30,7 @@ constructor(
     fun newFooter(rowBlock: RowBlock.() -> Unit): TableBuilder {
         val rowBlockImpl = RowBlockImpl()
         rowBlock(rowBlockImpl)
-        footer.add(rowBlockImpl.cells)
+        footers.add(rowBlockImpl.cells)
         return this
     }
 
@@ -34,65 +38,67 @@ constructor(
         val sizes = buildSizes()
         val result = StringBuilder()
         // headers
-        result.append(tableFormat.headerLine(
-            columns.mapIndexed { index, columnData ->
-                tableFormat.headerCell(columnData.name).withSize(sizes[index], columnData.columnDirection)
+        result.appendln(tableFormat.headerFormat.line(
+            headers.mapIndexed { index, columnData ->
+                tableFormat.headerFormat.cell(columnData.name, sizes[index]?:0, columnData.columnDirection)
             }
-        )).append("\n")
+        ))
         // dividers
-        if (tableFormat.isHeaderDividerRowEnabled)
-            result.append(
-                tableFormat.dividers(
-                    columns.mapIndexed { index, columnData ->
-                        tableFormat.headerDivider(sizes[index] ?: 0, columnData.columnDirection)
-                    }
-                )).append("\n")
+        tableFormat.headerDividerFormat?.let { format->
+            format.line(
+                headers.mapIndexed { index, columnData ->
+                    format.cell("", sizes[index] ?: 0, columnData.columnDirection)
+                }
+            )
+        }?.let { result.appendln(it) }
         // rows
         rows.forEach { row ->
-            result.append(
-                tableFormat.cellLine(
+            result.appendln(
+                tableFormat.bodyFormat.line(
                     row.mapIndexedNotNull { index, cell ->
                         try {
-                            tableFormat.cell(cell).withSize(sizes[index], columns[index].columnDirection)
+                            tableFormat.bodyFormat.cell(cell, sizes[index]?:0, headers[index].columnDirection )
                         } catch (e: Exception) {
                             null
                         }
                     }
                 )
-            ).append("\n")
+            )
         }
         // footers
-        if (footer.isNotEmpty())
-            result.append(
-                tableFormat.dividers(
-                    columns.mapIndexed { index, _ ->
-                        tableFormat.divider(sizes[index] ?: 0)
+        if (footers.isNotEmpty())
+            tableFormat.footerDivider?.let { format ->
+                format.line(
+                    headers.mapIndexed { index, _ ->
+                        format.cell("",sizes[index] ?: 0, headers[index].columnDirection)
                     }
-                )).append("\n")
-        footer.forEach { row ->
-            result.append(
-                tableFormat.headerLine(
+                )
+            }?.let { result.appendln(it) }
+        val footerFormat = tableFormat.footerFormat ?: tableFormat.bodyFormat
+        footers.forEach { row ->
+            result.appendln(
+                    footerFormat.line(
                     row.mapIndexedNotNull { index, cell ->
                         try {
-                            tableFormat.headerCell(cell).withSize(sizes[index], columns[index].columnDirection)
+                            footerFormat.cell(cell, sizes[index]?:0, headers[index].columnDirection)
                         } catch (e: Exception) {
                             null
                         }
                     }
                 )
-            ).append("\n")
+            )
         }
         return result.toString()
     }
 
     private fun buildSizes(): MutableMap<Int, Int> {
         val sizes = mutableMapOf<Int, Int>()
-        columns.forEachIndexed { index, columnData ->
+        headers.forEachIndexed { index, columnData ->
             sizes[index] = columnData.name.length
         }
-        if (tableFormat.isHeaderDividerRowEnabled) {
-            columns.mapIndexed { index, columnData ->
-                val headerDivider = tableFormat.headerDivider(sizes[index] ?: 0, columnData.columnDirection)
+        headers.mapIndexed { index, columnData ->
+            tableFormat.headerDividerFormat?.let { format ->
+                val headerDivider = format.cell("",sizes[index] ?: 0, columnData.columnDirection)
                 sizes[index] = max(sizes[index] ?: 0, headerDivider.length)
             }
         }
@@ -101,7 +107,7 @@ constructor(
                 sizes[index] = max(sizes[index] ?: 0, cell.length)
             }
         }
-        footer.forEach { cells ->
+        footers.forEach { cells ->
             cells.forEachIndexed { index, cell ->
                 sizes[index] = max(sizes[index] ?: 0, cell.length)
             }
@@ -128,10 +134,10 @@ constructor(
     private class ColumnBlockImpl(private val builder: TableBuilder) : ColumnBlock {
 
         override fun add(name: String, direction: ColumnDirection) {
-            builder.columns.add(
+            builder.headers.add(
                 ColumnData(
-                    name = name,
-                    columnDirection = direction
+                        name = name,
+                        columnDirection = direction
                 )
             )
         }
@@ -146,5 +152,10 @@ constructor(
         override fun skip() {
             cells.add("")
         }
+    }
+
+    companion object {
+        private fun StringBuilder.appendln(string: String): StringBuilder =
+            this.append(string).append("\n")
     }
 }
