@@ -68,6 +68,23 @@ class Element<T : Any?>(
             throw IllegalArgumentException("Unable calculate a minus on nom-number element.", e)
         }
     }
+    operator fun div(other: Element<*>): Double {
+        try {
+            val selfNumber = asDouble()
+            val otherNumber = other.asDouble()
+            return selfNumber / otherNumber
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Unable calculate a minus on nom-number element.", e)
+        }
+    }
+    operator fun div(other: Int): Element<Double> {
+        try {
+            val selfNumber = asDouble()
+            return Element(selfNumber / other)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Unable calculate a minus on nom-number element.", e)
+        }
+    }
 
     fun asDouble(): Double {
         return when (element) {

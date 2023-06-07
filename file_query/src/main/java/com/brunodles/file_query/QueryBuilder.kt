@@ -20,13 +20,13 @@ class QueryBuilder(
     private var selectFunction: (SelectFieldContext.() -> Unit)? = null
 
     /** filter to detect if the file matches a *table* */
-    private var fromFilter: FileQueryContext.() -> Boolean = { true }
+    private var fromFilterFunction: FileQueryContext.() -> Boolean = { true }
 
     /** filter to detect if the content */
     private var whereFunction: FileQueryContext.() -> Boolean = { true }
 
     /** prints the result */
-    private var presentation: ((List<List<String>>) -> String)? = null
+    private var presentationFunction: ((List<List<String>>) -> String)? = null
 
     fun select(function: SelectFieldContext.() -> Unit): QueryBuilder {
         selectFunction = function
@@ -34,7 +34,7 @@ class QueryBuilder(
     }
 
     fun from(function: FileQueryContext.() -> Boolean): QueryBuilder {
-        fromFilter = function
+        fromFilterFunction = function
         return this
     }
 
@@ -44,6 +44,7 @@ class QueryBuilder(
     }
 
     fun execute(): List<List<String>> {
+        val indexNameSuggestion = mutableMapOf<Int,String>()
         val result = jsonDatabase.rootDir
             .walk()
             .filter { it.isFile }
@@ -57,17 +58,23 @@ class QueryBuilder(
                     }
                 }?.let { element -> FileQueryContext(file, element) }
             }
-            .filter { context -> fromFilter(context) && whereFunction(context) }
+            .filter { context -> fromFilterFunction(context) && whereFunction(context) }
             .map { context ->
-                val selectFieldContext = SelectFieldContext(context)
+                val selectFieldContext = SelectFieldContext(context) { index, name -> indexNameSuggestion[index] = name}
                 selectFunction?.invoke(selectFieldContext)
                         ?: throw IllegalArgumentException("The 'select' is missing.")
                 selectFieldContext.result
             }
             .toList()
-        presentation?.let {
+        (presentationFunction ?: { data ->
+            data.present(format = FormatDefault.simple) {
+                indexNameSuggestion.toSortedMap().forEach { (index, name) ->
+                    add(name)
+                }
+            }
+        }).let { function->
             result
-                .let(it)
+                .let(function)
                 .println()
         }
         return result
@@ -78,7 +85,7 @@ class QueryBuilder(
         format: FormatDefault = FormatDefault.simple,
         columnsBlock: TableBuilder.ColumnBlock.() -> Unit,
     ) {
-        presentation = { data ->
+        presentationFunction = { data ->
             data.present(format, columnsBlock)
         }
     }
@@ -91,31 +98,39 @@ class QueryBuilder(
     }
 
     data class SelectFieldContext(
-        private val fileQueryContext: FileQueryContext
+        private val fileQueryContext: FileQueryContext,
+        private val fieldNameCallback : (Int, String) -> Unit,
     ) {
+        private var currentFieldIndex = 0
         internal val result = mutableListOf<String>()
         private val field = fileQueryContext.field
         private val file = fileQueryContext.file
 
         @JvmOverloads
-        fun field(key: String, function: Element<*>.() -> Any? = { this }) {
-            add(function(field[key]))
+        fun field(key: String, function: Element<*>.() -> Any? = { this }, named:String = key) {
+            add(named, function(field[key]))
         }
 
         @JvmOverloads
-        fun file(function: File.() -> Any? = { this }) {
-            add(function(file))
+        fun file(function: File.() -> Any? = { this }, named: String = "file") {
+            add(named,function(file))
         }
 
-        fun dateFormat(key: String, format: String) {
-            add(ExtraFunctions.dateFormat(field[key], format))
+        @JvmOverloads
+        fun dateFormat(key: String, format: String, named:String = key) {
+            add(named, ExtraFunctions.dateFormat(field[key], format))
         }
 
-        fun func(function: FileQueryContext.() -> Any) {
-            add(function(fileQueryContext))
+        @JvmOverloads
+        fun func(named: String = "func", function: FileQueryContext.() -> Any) {
+            add(named, function(fileQueryContext))
+        }
+        fun func(function: FileQueryContext.() -> Any, named: String = "func") {
+            add(named, function(fileQueryContext))
         }
 
-        fun add(content: Any?) {
+        private fun add(fieldName:String, content: Any?) {
+            fieldNameCallback(currentFieldIndex++, fieldName)
             result += content?.toString() ?: "null"
         }
     }
