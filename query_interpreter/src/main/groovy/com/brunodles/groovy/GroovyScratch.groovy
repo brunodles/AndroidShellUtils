@@ -4,6 +4,7 @@ import groovy.json.JsonOutput
 import groovy.yaml.YamlBuilder
 import org.apache.groovy.yaml.util.YamlConverter
 
+import static com.brunodles.groovy.ExtensionFunctions.first
 import static com.brunodles.groovy.ExtensionFunctions.registerCustomExtensionFunctions
 import static com.brunodles.groovy.ExtensionFunctions.tryOrNull
 
@@ -12,16 +13,29 @@ class GroovyScratch {
     static void main(String[] args) {
         registerCustomExtensionFunctions()
 
-        def jsonDir = new File("/Users/bruno.lima/workspace/AndroidShellUtils/sample_data/boards/")
-        jsonDir.listFiles()
-            .sort()
-            .take(10)
-            .each {file ->
-                tryOrNull {
-                    def outputFIle = new File(file.absolutePath.replace(".json", ".yaml"))
-                    outputFIle.write(YamlConverter.convertJsonToYaml(file.newReader()))
-                }
-            }
+        def fileNames = [".last15.csv", "a__shipwright.json", "a__shipwright.yaml"]
+        def dir = new File("/Users/bruno.lima/workspace/AndroidShellUtils/sample_data/boards/")
+        fileNames.collect {fileName ->
+            def file = new File(dir, fileName)
+            first(
+                    { file.readCsv() },
+                    { List.of(file.readJson()) },
+                    { List.of(file.readYaml()) }
+            ) ?: List.of()
+        }.flatten()
+            .forEach{ item ->
+            println "${item.__sourceType} - ${item.name} - ${item.lastChange}."
+        }
+
+//        jsonDir.listFiles()
+//            .sort()
+//            .take(10)
+//            .each {file ->
+//                tryOrNull {
+//                    def outputFIle = new File(file.absolutePath.replace(".json", ".yaml"))
+//                    outputFIle.write(YamlConverter.convertJsonToYaml(file.newReader()))
+//                }
+//            }
 //        def file = new File("/Users/bruno.lima/workspace/AndroidShellUtils/sample_data/boards/a_certain_scientific_railgun.json")
 //        def json = file.readJson()
 
