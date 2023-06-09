@@ -7,7 +7,9 @@ import com.brunodles.tablebuilder.TableBuilder
 import org.apache.groovy.ginq.provider.collection.runtime.NamedRecord
 import org.codehaus.groovy.control.CompilerConfiguration
 
+import static com.brunodles.groovy.ExtensionFunctions.first
 import static com.brunodles.groovy.ExtensionFunctions.registerCustomExtensionFunctions
+import static com.brunodles.groovy.ExtensionFunctions.tryOrNull
 
 class GroovyInterpreter {
 
@@ -36,17 +38,17 @@ class GroovyInterpreter {
         config.scriptExtensions += DelegatingScript.class.name
 
         Map<String, String> params = args.drop(1)
-            .findAll{it.contains("=") }
-            .collectEntries{
+            .findAll { it.contains("=") }
+            .collectEntries {
                 it.split("=")
             }
 
         GroovyShell shell = new GroovyShell(this.class.classLoader, binding, config)
         shell.setVariable("args", MyProxy.create(args.drop(1)))
         shell.setVariable("params", MyProxy.create(params))
-        shell.setVariable("database", {-> database()})
-        shell.setVariable("workingDir", {newPath-> workingDir = newPath})
-        shell.setVariable("format", {newFormat-> presentationFormat = FormatDefault.valueOf(newFormat.toString())})
+        shell.setVariable("database", { -> database() })
+        shell.setVariable("workingDir", { newPath -> workingDir = newPath })
+        shell.setVariable("format", { newFormat -> presentationFormat = FormatDefault.valueOf(newFormat.toString()) })
 
         def file = new File(args.first())
         def fileContent = file
@@ -71,14 +73,18 @@ class GroovyInterpreter {
 
         def tableBuilder = new TableBuilder(presentationFormat)
             .columns { columnBlock ->
-                resultList.collect {record ->
-                    record.nameList.withIndex().collectEntries { name, index ->
+                resultList.collect { record ->
+                    if (record == null)
+                        return null
+                    (record.nameList ?: (0..record.size()).collect{ "col-$it"})
+                        .withIndex().collectEntries { name, index ->
                         def direction
                         if (record[index].toString().isNumber())
                             direction = ColumnDirection.right
                         else
                             direction = ColumnDirection.left
-                        [index, [name: name, direction: direction]] }
+                        [index, [name: name, direction: direction]]
+                    }
                 }.inject { aggregator, value ->
                     aggregator + value
                 }.sort()
@@ -87,9 +93,9 @@ class GroovyInterpreter {
                     }
             }
 
-        resultList.forEach {record ->
-            tableBuilder.newRow {rowBlock ->
-                record.forEach { cell->
+        resultList.forEach { record ->
+            tableBuilder.newRow { rowBlock ->
+                record.forEach { cell ->
                     rowBlock.add(cell)
                 }
             }
@@ -98,12 +104,17 @@ class GroovyInterpreter {
         println tableBuilder.build()
     }
 
-    List<File> database() {
+    List<Object> database() {
         def databaseFileList = new ArrayList<File>()
 //        new File("./")
         new File(workingDir)
-                .eachFileRecurse { file -> if (file.isFile()) databaseFileList.add(file) }
-        return databaseFileList.collect { it.toJson() }
+            .eachFileRecurse { file -> if (file.isFile()) databaseFileList.add(file) }
+        return databaseFileList.collect {file ->
+            first(
+                { file.readJson() },
+                { file.readYaml() }
+            ) ?: MyProxy.create(new Object())
+        }
     }
 
     static void main(String[] args) {
