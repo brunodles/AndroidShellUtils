@@ -40,3 +40,6 @@ MarkDown
 | r1   |   r2  |   r3 |
 | r1   |   r2  |   r3 |
 ```
+
+## Next Steps
+* [ ] Parameterized version of the existing formats
