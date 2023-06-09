@@ -15,7 +15,7 @@ format(params.format ?: args[0] ?: markdown)
 
 // Custom functions are supported
 def splitTake(String content, String separator, Integer index) {
-  return content.split(separator)[index]
+  return tryOrNull { content.split(separator)[index] }
 }
 
 # https://groovy-lang.org/using-ginq.html#_ginq_a_k_a_groovy_integrated_query
@@ -45,9 +45,11 @@ GQ {
         board.name,
         board.imagesCount,
         splitTake(board.lastChange, " ", 0) as date,
-        splitTake(board.lastChange, " ", 1) as time
+        splitTake(board.lastChange, " ", 1) as time,
+        board["__sourceType"] as sourceType,
+        board["__sourceFile"].name as fileName
   )
   where board.date in ["2022.01.06", "2022.05.05"]
-  orderby board.date, board.time
+  orderby board.name, board.date, board.time
   select board
 }
