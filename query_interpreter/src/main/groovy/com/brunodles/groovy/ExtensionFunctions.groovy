@@ -13,5 +13,9 @@ class ExtensionFunctions {
             return MyProxy.create(jsonObject)
 //            return jsonObject
         }
+        Collection.metaClass.random = { ->
+            def random = new Random()
+            return delegate.get(random.nextInt(delegate.size()))
+        }
     }
 }
