@@ -66,27 +66,28 @@ constructor(
             )
         }
         // footers
-        if (footers.isNotEmpty())
+        if (footers.isNotEmpty()) {
             tableFormat.footerDivider?.let { format ->
                 format.line(
                     headers.mapIndexed { index, _ ->
-                        format.cell("",sizes[index] ?: 0, headers[index].columnDirection)
+                        format.cell("", sizes[index] ?: 0, headers[index].columnDirection)
                     }
                 )
             }?.let { result.appendln(it) }
-        val footerFormat = tableFormat.footerFormat ?: tableFormat.bodyFormat
-        footers.forEach { row ->
-            result.appendln(
+            val footerFormat = tableFormat.footerFormat ?: tableFormat.bodyFormat
+            footers.forEach { row ->
+                result.appendln(
                     footerFormat.line(
-                    row.mapIndexedNotNull { index, cell ->
-                        try {
-                            footerFormat.cell(cell, sizes[index]?:0, headers[index].columnDirection)
-                        } catch (e: Exception) {
-                            null
+                        row.mapIndexedNotNull { index, cell ->
+                            try {
+                                footerFormat.cell(cell, sizes[index] ?: 0, headers[index].columnDirection)
+                            } catch (e: Exception) {
+                                null
+                            }
                         }
-                    }
+                    )
                 )
-            )
+            }
         }
         return result.toString()
     }

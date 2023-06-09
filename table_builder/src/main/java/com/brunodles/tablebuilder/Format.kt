@@ -1,7 +1,5 @@
 package com.brunodles.tablebuilder
 
-import com.brunodles.utils.createString
-
 /**
  * Define a format of how the table data will be presented
  */
@@ -29,21 +27,4 @@ interface Format {
         fun cell(content: String, size: Int, direction: ColumnDirection): String
     }
 
-    class SimpleContentFormat(
-        private val separator: String
-    ) : ContentFormat {
-        override fun line(content: List<String>): String =
-            content.joinToString(separator)
-        override fun cell(content: String, size: Int, direction: ColumnDirection): String =
-            content.withSize(size, direction)
-    }
-    class SimpleDividerFormat(
-        private val separator: String,
-        private val dividerChar : Char,
-    ) : ContentFormat {
-        override fun line(content: List<String>): String =
-            content.joinToString(separator)
-        override fun cell(content: String, size: Int, direction: ColumnDirection): String =
-            createString(dividerChar, size)
-    }
 }
