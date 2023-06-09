@@ -1,0 +1,43 @@
+{
+  "key": "928998_568030206698331_1202177983_n_jpg",
+  "originalUrl": null,
+  "borderColors": {
+    "mostCommon": "#D2C7A9",
+    "left": "#D2C7A9",
+    "right": "#F2E8DC",
+    "top": "#ECE1CF",
+    "bottom": "#6D6246"
+  },
+  "size": {
+    "width": 640,
+    "height": 640
+  },
+  "swatchesColors": [
+    "#BBB19A",
+    "#2D9D8F",
+    "#2D5954",
+    "#918977",
+    "#5E5C53",
+    "#ACDFD4",
+    "#D9D0BE",
+    "#B3BAB1",
+    "#3DB6A8",
+    "#62B9AD",
+    "#1E1E1C",
+    "#F0E9DB",
+    "#2B302F",
+    "#57A699",
+    "#62837B"
+  ],
+  "namedSwatches": {
+    "lightVibrantSwatch": "#ACDFD4",
+    "vibrantSwatch": "#3DB6A8",
+    "darkVibrantSwatch": "#2D9D8F",
+    "lightMutedSwatch": "#D9D0BE",
+    "mutedSwatch": "#57A699",
+    "darkMutedSwatch": "#2D5954"
+  },
+  "extension": "jpg",
+  "url": null,
+  "pins": []
+}
