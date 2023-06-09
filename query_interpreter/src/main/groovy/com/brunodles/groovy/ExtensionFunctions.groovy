@@ -1,6 +1,8 @@
 package com.brunodles.groovy
 
 import groovy.json.JsonSlurper
+import groovy.yaml.YamlBuilder
+import groovy.yaml.YamlSlurper
 
 class ExtensionFunctions {
 
@@ -8,15 +10,29 @@ class ExtensionFunctions {
     }
 
     public static void registerCustomExtensionFunctions() {
-        File.metaClass.toJson = { ->
-            def jsonObject = new JsonSlurper().parseText(new String(delegate.readBytes()))
-            return MyProxy.create(jsonObject)
-//            return jsonObject
+        File.metaClass.readJson = { ->
+            def readObject = new JsonSlurper().parse(delegate as File)
+            return MyProxy.create(readObject)
         }
+        File.metaClass.readYaml = { ->
+            def readObject = new YamlSlurper().parse(delegate as File)
+            return MyProxy.create(readObject)
+        }
+
         Collection.metaClass.random = { ->
             def random = new Random()
             return delegate.get(random.nextInt(delegate.size()))
         }
+    }
+
+    static def first(Closure... closures) {
+        for (final def closure in closures) {
+            def result = tryOrNull { closure() }
+            if (result != null)
+                return result
+        }
+        return null
+    }
 
     static def tryOrNull(Closure closure) {
         try {
