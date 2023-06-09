@@ -1,1 +1,13 @@
-{"key":"a__shipwright","name":"A. Shipwright","url":null,"expectedPins":0,"pinCount":0,"imagesCount":214,"enabled":false,"lastChange":"2022.01.06 20:50:13","pins":[],"errors":[],"imagesMissing":[]}
+{
+  "key": "a__shipwright",
+  "name": "A. Shipwright",
+  "url": null,
+  "expectedPins": 0,
+  "pinCount": 0,
+  "imagesCount": 214,
+  "enabled": false,
+  "lastChange": "2022.01.06 20:50:13",
+  "pins": [],
+  "errors": [],
+  "imagesMissing": []
+}
