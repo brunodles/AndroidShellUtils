@@ -58,7 +58,7 @@ class ExtensionFunctions {
         return content
     }
 
-    static def first(Closure... closures) {
+    static <T> T first(Closure<T>... closures) {
         for (final def closure in closures) {
             def result = tryOrNull { closure() }
             if (result != null)
@@ -67,7 +67,7 @@ class ExtensionFunctions {
         return null
     }
 
-    static def tryOrNull(Closure closure) {
+    static <T> T tryOrNull(Closure<T> closure) {
         try {
             return closure()
         } catch (Throwable ignore) {
