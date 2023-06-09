@@ -12,11 +12,17 @@ class ExtensionFunctions {
     public static void registerCustomExtensionFunctions() {
         File.metaClass.readJson = { ->
             def readObject = new JsonSlurper().parse(delegate as File)
-            return MyProxy.create(readObject)
+            def result = MyProxy.create(readObject)
+            result.putExtraProperty("__sourceType", "json")
+            result.putExtraProperty("__sourceFile", delegate)
+            return result
         }
         File.metaClass.readYaml = { ->
             def readObject = new YamlSlurper().parse(delegate as File)
-            return MyProxy.create(readObject)
+            def result = MyProxy.create(readObject)
+            result.putExtraProperty("__sourceType", "yaml")
+            result.putExtraProperty("__sourceFile", delegate)
+            return result
         }
 
         Collection.metaClass.random = { ->
