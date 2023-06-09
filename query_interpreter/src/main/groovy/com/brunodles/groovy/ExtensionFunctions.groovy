@@ -17,5 +17,12 @@ class ExtensionFunctions {
             def random = new Random()
             return delegate.get(random.nextInt(delegate.size()))
         }
+
+    static def tryOrNull(Closure closure) {
+        try {
+            return closure()
+        } catch (Throwable ignore) {
+        }
+        return null
     }
 }
