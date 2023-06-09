@@ -2,6 +2,8 @@ package com.brunodles.groovy
 
 public class MyProxy extends groovy.util.Proxy {
 
+    private Map<String, Object> extraProperties = new HashMap<>()
+
     @Override
     Object invokeMethod(String name, Object args) {
         if (name == "contains") {
@@ -17,6 +19,12 @@ public class MyProxy extends groovy.util.Proxy {
     // Do not use any properties here, it would cause stackoverflow
     @Override
     Object getProperty(String propertyName) {
+        try {
+            def value = extraProperties.get(propertyName, null)
+            if (value != null)
+            return value
+        } catch (Throwable ignored) {
+        }
         if (getAdaptee() instanceof Map) {
             return getAdaptee()[propertyName]
         }
@@ -36,6 +44,10 @@ public class MyProxy extends groovy.util.Proxy {
         } catch (Throwable ignored) {
         }
         return false
+    }
+
+    public def putExtraProperty(String name, Object value) {
+        extraProperties.put(name, value)
     }
 
     @Override
