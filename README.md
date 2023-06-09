@@ -13,6 +13,7 @@ This project will be implemented in these submodules:
 * [ ] ~~local script evaluator that allows to send commands directly to 'adb shell run-as'~~ _won't do_
 * [x] file query - a library to build query-like search on files
 * [x] file query interpreter groovy - a groovy application to act as a shell interpreter for query-scripts using file query
+* [x] query interpreter - a groovy application working as shell interpreter using the GQ instead of file query
 
 ## Inspiration / motivation
 The overall idea came from [other repository](https://github.com/brunodles/linux-second-screen)
