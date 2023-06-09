@@ -26,20 +26,20 @@ dependencies {
     testImplementation "io.mockk:mockk:1.8.13"
 }
 
-//jar {
-//    manifest {
-//        attributes(
-//                'Class-Path':
-//                        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) },
-//                'Main-Class': mainClassName
-//        )
-//    }
-//
-//    from {
-//        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-//    }
-//    into ''
-//}
+jar {
+    manifest {
+        attributes(
+                'Class-Path':
+                        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) },
+                'Main-Class': mainClassName
+        )
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    into ''
+}
 
 task fatJar(type: Jar) {
     manifest {
