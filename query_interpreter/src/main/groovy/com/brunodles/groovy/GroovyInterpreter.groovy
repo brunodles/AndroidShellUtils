@@ -18,6 +18,7 @@ class GroovyInterpreter {
             import static com.brunodles.tablebuilder.FormatDefault.*
             import com.brunodles.tablebuilder.FormatDefault
             import static com.brunodles.groovy.FormatFunctions.*
+            import static com.brunodles.groovy.ExtensionFunctions.*
             import static java.lang.Math.*
             import java.lang.Math
             import static org.apache.groovy.ginq.GinqGroovyMethods.*
@@ -111,10 +112,11 @@ class GroovyInterpreter {
             .eachFileRecurse { file -> if (file.isFile()) databaseFileList.add(file) }
         return databaseFileList.collect {file ->
             first(
-                { file.readJson() },
-                { file.readYaml() }
-            ) ?: MyProxy.create(new Object())
-        }
+                { file.readCsv() },
+                { List.of(file.readJson()) },
+                { List.of(file.readYaml()) }
+            ) ?: List.of()
+        }.flatten()
     }
 
     static void main(String[] args) {

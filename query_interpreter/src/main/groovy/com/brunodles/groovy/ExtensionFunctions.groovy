@@ -24,11 +24,38 @@ class ExtensionFunctions {
             result.putExtraProperty("__sourceFile", delegate)
             return result
         }
+        File.metaClass.readCsv = { ->
+            if ((delegate as File).absolutePath.endsWith('.csv')) {
+                return readCharacterSeparatedValueFile(delegate as File, ",")
+            }
+            return null
+        }
 
         Collection.metaClass.random = { ->
             def random = new Random()
             return delegate.get(random.nextInt(delegate.size()))
         }
+    }
+
+    static def readCharacterSeparatedValueFile(File file, String separator) {
+        List<String> lines = file.readLines()
+        List<Tuple2<String, Integer>> headers = lines.first()
+            .split(separator)
+            .collect { it.trim() }
+            .withIndex()
+        List<Object> content = lines.drop(1)
+            .findAll {line -> !line.trim().isEmpty()}
+            .collect { line ->
+                List<String> row = line.split(separator)
+                Map<String, Object> content = headers.collectEntries {name, index ->
+                    [name, row[index]]
+                }
+                def result = MyProxy.create(content)
+                result.putExtraProperty("__sourceType", "csv")
+                result.putExtraProperty("__sourceFile", file)
+                return result
+            }
+        return content
     }
 
     static def first(Closure... closures) {
