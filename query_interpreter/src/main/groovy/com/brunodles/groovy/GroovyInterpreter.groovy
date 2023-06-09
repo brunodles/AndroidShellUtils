@@ -64,6 +64,11 @@ class GroovyInterpreter {
     private void buildPresentationTable() {
         List<NamedRecord> resultList = scriptResult.toList()
 
+        if (resultList.isEmpty()) {
+            println "Empty. No data available."
+            return
+        }
+
         def tableBuilder = new TableBuilder(presentationFormat)
             .columns { columnBlock ->
                 resultList.collect {record ->
