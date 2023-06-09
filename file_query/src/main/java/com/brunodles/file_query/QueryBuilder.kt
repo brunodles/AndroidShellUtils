@@ -2,6 +2,7 @@ package com.brunodles.file_query
 
 import com.brunodles.file_query.ExtraFunctions.present
 import com.brunodles.file_query.ExtraFunctions.println
+import com.brunodles.tablebuilder.ColumnDirection
 import com.brunodles.tablebuilder.FormatDefault
 import com.brunodles.tablebuilder.TableBuilder
 import com.google.gson.Gson
@@ -43,11 +44,14 @@ class QueryBuilder(
         return this
     }
 
-    fun execute(): List<List<String>> {
-        val indexNameSuggestion = mutableMapOf<Int,String>()
+    fun execute(
+        debuggingBlock: (String) -> Unit = {}
+    ): List<List<String>> {
+        val indexNameSuggestion = mutableMapOf<Int,Pair<String, ColumnDirection>>()
         val result = jsonDatabase.rootDir
             .walk()
             .filter { it.isFile }
+            .onEach { debuggingBlock("files") }
             .mapNotNull { file ->
                 val fileText = file.readText()
                 GSON_CLASSES.firstNotNullOfOrNull { classType ->
@@ -56,20 +60,27 @@ class QueryBuilder(
                     } catch (_: Exception) {
                         null
                     }
-                }?.let { element -> FileQueryContext(file, element) }
+                }?.let { element ->
+                    debuggingBlock(". json")
+                    FileQueryContext(file, element, FileType.gson)
+                }
             }
-            .filter { context -> fromFilterFunction(context) && whereFunction(context) }
+            .filter { context -> fromFilterFunction(context)}
+            .onEach { debuggingBlock("from") }
+            .filter { context -> whereFunction(context) }
+            .onEach { debuggingBlock("where") }
             .map { context ->
-                val selectFieldContext = SelectFieldContext(context) { index, name -> indexNameSuggestion[index] = name}
+                val selectFieldContext = SelectFieldContext(context) { index, name, direction -> indexNameSuggestion[index] = name to direction}
                 selectFunction?.invoke(selectFieldContext)
                         ?: throw IllegalArgumentException("The 'select' is missing.")
                 selectFieldContext.result
             }
+            .onEach { debuggingBlock("select") }
             .toList()
         (presentationFunction ?: { data ->
             data.present(format = FormatDefault.simple) {
-                indexNameSuggestion.toSortedMap().forEach { (index, name) ->
-                    add(name)
+                indexNameSuggestion.toSortedMap().forEach { (_, data) ->
+                    add(data.first, data.second)
                 }
             }
         }).let { function->
@@ -93,13 +104,14 @@ class QueryBuilder(
     data class FileQueryContext(
         val file: File,
         val field: Element<*>,
+        val fileType: FileType,
     ) {
         fun field(key: String): Element<*> = field[key]
     }
 
     data class SelectFieldContext(
         private val fileQueryContext: FileQueryContext,
-        private val fieldNameCallback : (Int, String) -> Unit,
+        private val fieldNameCallback : (Int, String, ColumnDirection) -> Unit,
     ) {
         private var currentFieldIndex = 0
         internal val result = mutableListOf<String>()
@@ -133,9 +145,20 @@ class QueryBuilder(
         }
 
         private fun add(fieldName:String, content: Any?) {
-            fieldNameCallback(currentFieldIndex++, fieldName)
+            val direction = when {
+                content is Number -> ColumnDirection.right
+                content is Element<*> && content.isNumber() -> ColumnDirection.right
+                else -> ColumnDirection.left
+            }
+            fieldNameCallback(currentFieldIndex++, fieldName, direction)
             result += content?.toString() ?: "null"
         }
+    }
+
+    enum class FileType {
+        gson,
+        csv,
+        ;
     }
 
     companion object {

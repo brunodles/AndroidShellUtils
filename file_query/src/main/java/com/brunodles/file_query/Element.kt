@@ -25,7 +25,7 @@ class Element<T : Any?>(
     }
 
     infix fun eq(value: Int): Boolean {
-        return eq(value.toString())
+        return element.toString() == value.toString()
     }
 
     infix fun eq(value: String): Boolean {
@@ -33,6 +33,10 @@ class Element<T : Any?>(
     }
 
     infix fun eq(value: Boolean): Boolean {
+        return element.toString() == value.toString()
+    }
+
+    infix fun eq(value : Any) : Boolean {
         return element.toString() == value.toString()
     }
 
@@ -52,7 +56,16 @@ class Element<T : Any?>(
     }
 
     infix fun contains(content: String): Boolean {
-        return element.toString().contains(content, true)
+        try {
+            return when(element) {
+                is Collection<*> -> element.map { it.toString().lowercase() }.contains(content.lowercase())
+//                is JsonArray -> element.map { it.toString().lowercase() }.contains(content.lowercase())
+                is String -> element.contains(content, true)
+                else -> element.toString().contains(content, true)
+            }
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Unable call \"contains\" on \"${elementClassName()}\".", e)
+        }
     }
 
     override fun toString(): String {
@@ -119,4 +132,5 @@ class Element<T : Any?>(
     fun isNull() : Boolean = element == null
 
     private fun elementClassName(): String = element?.let { it::class.java.simpleName } ?: "null"
+    fun isNumber(): Boolean = element is Number
 }
