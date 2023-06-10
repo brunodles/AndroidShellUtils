@@ -11,18 +11,25 @@ class ExtensionFunctions {
 
     public static void registerCustomExtensionFunctions() {
         File.metaClass.readJson = { ->
-            def readObject = new JsonSlurper().parse(delegate as File)
-            def result = MyProxy.create(readObject)
-            result.putExtraProperty("__sourceType", "json")
-            result.putExtraProperty("__sourceFile", delegate)
-            return result
+            if ((delegate as File).absolutePath.endsWith('.json')) {
+                def readObject = new JsonSlurper().parse(delegate as File)
+                def result = MyProxy.create(readObject)
+                result.putExtraProperty("__sourceType", "json")
+                result.putExtraProperty("__sourceFile", delegate)
+                return result
+            }
+            return null
         }
         File.metaClass.readYaml = { ->
-            def readObject = new YamlSlurper().parse(delegate as File)
-            def result = MyProxy.create(readObject)
-            result.putExtraProperty("__sourceType", "yaml")
-            result.putExtraProperty("__sourceFile", delegate)
-            return result
+            def path = (delegate as File).absolutePath
+            if (path.endsWith('.yaml') || path.endsWith(".yml")) {
+                def readObject = new YamlSlurper().parse(delegate as File)
+                def result = MyProxy.create(readObject)
+                result.putExtraProperty("__sourceType", "yaml")
+                result.putExtraProperty("__sourceFile", delegate)
+                return result
+            }
+            return null
         }
         File.metaClass.readCsv = { ->
             if ((delegate as File).absolutePath.endsWith('.csv')) {
