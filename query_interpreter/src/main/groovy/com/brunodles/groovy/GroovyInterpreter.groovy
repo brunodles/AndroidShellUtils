@@ -142,6 +142,7 @@ class GroovyInterpreter {
         return databaseFileList.collect { file ->
             first(
                 { file.readCsv() },
+                { file.readTsv() },
                 { List.of(file.readJson()) },
                 { List.of(file.readYaml()) }
             ) ?: Collections.emptyList()
