@@ -1,6 +1,7 @@
 package com.brunodles.groovy
 
 import groovy.json.JsonOutput
+import groovy.xml.MarkupBuilder
 import groovy.yaml.YamlBuilder
 import org.apache.groovy.yaml.util.YamlConverter
 
@@ -13,19 +14,42 @@ class GroovyScratch {
     static void main(String[] args) {
         registerCustomExtensionFunctions()
 
-        def fileNames = [".last15.csv", "a__shipwright.json", "a__shipwright.yaml"]
-        def dir = new File("/Users/bruno.lima/workspace/AndroidShellUtils/sample_data/boards/")
-        fileNames.collect {fileName ->
-            def file = new File(dir, fileName)
-            first(
-                    { file.readCsv() },
-                    { List.of(file.readJson()) },
-                    { List.of(file.readYaml()) }
-            ) ?: List.of()
-        }.flatten()
-            .forEach{ item ->
-            println "${item.__sourceType} - ${item.name} - ${item.lastChange}."
+        def file = new File("/home/bruno/workspace/android/AndroidShellUtils/sample_data/boards/a__shipwright.json")
+        def json = file.readJson()
+        new StringWriter().with { sw ->
+            new MarkupBuilder(sw).board(
+                    key: "a__shipwright",
+                    name: "A. Shipwright",
+                    url: null,
+                    expectedPins: 0,
+                    pinCount: 0,
+                    imagesCount: 214,
+                    enabled: false,
+                    lastChange: "2022.01.06 20:50:13",
+                    pins: [],
+                    errors: [],
+                    imagesMissing: []
+            )
+            println sw.toString()
         }
+
+
+//        def fileNames = ["a__shipwright.json"]
+//        def dir = new File("/Users/bruno.lima/workspace/AndroidShellUtils/sample_data/boards/")
+//        fileNames.collect { fileName ->
+//            new File(dir, fileName)
+//        }.collect {file ->
+//            first(
+//                    { file.readCsv() },
+//                    { file.readTsv() },
+//                    { List.of(file.readJson()) },
+//                    { List.of(file.readYaml()) }
+//            ) ?: Collections.emptyList()
+//        }.each { println it }
+//                .flatten()
+//                .forEach { item ->
+//                    println "${item.__sourceType} - ${item.name} - ${item.lastChange}."
+//                }
 
 //        jsonDir.listFiles()
 //            .sort()
