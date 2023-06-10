@@ -115,5 +115,23 @@ sealed class FormatDefaultImplementation(
     override fun toString(): String = name
 
     companion object {
+
+        @JvmStatic
+        val DEFAULT_IMPLEMENTATIONS = listOf<FormatDefaultImplementation>(
+            Csv,
+            CsvWithFooterDivider,
+            Tsv,
+            Simple,
+            Terminal,
+            Jira,
+            JiraSpaced,
+            JiraSpaced2,
+            JiraSpacedWithoutFooterDivider,
+            Markdown,
+        )
+
+        @JvmStatic
+        fun valueOf(name:String) : FormatDefaultImplementation? =
+            DEFAULT_IMPLEMENTATIONS.firstOrNull { it.name.equals(name, true) }
     }
 }
