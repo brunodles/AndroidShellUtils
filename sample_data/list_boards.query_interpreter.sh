@@ -10,8 +10,10 @@
 // Use `params[name]` or `params.name` to access nameed arguments. The params should be passed as `name=value`.
 
 workingDir("./boards")
-// Formats: simple, markdown, csv, jira
-format(params.format ?: args[0] ?: markdown)
+// FormatsV1: simple, markdown, csv, jira
+// FormatsV2: Csv, CsvWithFooterDivider, Tsv, Simple, Terminal, Jira, JiraSpaced, JiraSpaced2,
+//      JiraSpacedWithoutFooterDivider, Markdown
+format(params.format ?: args[0] ?: Terminal)
 
 // Custom functions are supported
 def splitTake(String content, String separator, Integer index) {
@@ -41,13 +43,12 @@ GQ {
   from board in (
     // We can even have nested queries, this is really great!!!
     from board in database()
-    select board.key,
+    select
         board.name,
         board.imagesCount,
         splitTake(board.lastChange, " ", 0) as date,
         splitTake(board.lastChange, " ", 1) as time,
-        board["__sourceType"] as sourceType,
-        board["__sourceFile"].name as fileName
+        board["__sourceFile"].name as sourceFile
   )
   where board.date in ["2022.01.06", "2022.05.05"]
   orderby board.name, board.date, board.time

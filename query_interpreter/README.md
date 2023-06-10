@@ -15,10 +15,13 @@ really well with dynamic properties.
 
 # Next steps
 * [ ] Support other input formats
-  * [ ] YAML
-  * [ ] CSV
-  * [ ] TSV
+  * [x] YAML
+  * [x] CSV
+  * [x] TSV
   * [ ] XML
 * [ ] Pass the fatjar through proguard. _Not sure if it would relly work, based on runtime/reflection properties of Groovy_
 * [ ] Create a way to "import" other script file. It will allow users to share the extra functions on a separate file.
 * [ ] [maybe] Improve the `database` function to accept parameters
+* [ ] Improve the query debugging
+  * [ ] Find a way to merge imports without concatenation, because it affects the query debugging
+  * [ ] Do not remove commented lines(`//`, `#`), just clean them up, but do not skip them
