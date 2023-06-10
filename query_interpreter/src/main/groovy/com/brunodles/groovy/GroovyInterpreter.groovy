@@ -3,6 +3,7 @@ package com.brunodles.groovy
 import com.brunodles.tablebuilder.ColumnDirection
 import com.brunodles.tablebuilder.Format
 import com.brunodles.tablebuilder.FormatDefault
+import com.brunodles.tablebuilder.FormatDefaultImplementation
 import com.brunodles.tablebuilder.TableBuilder
 import org.apache.groovy.ginq.provider.collection.runtime.NamedRecord
 import org.codehaus.groovy.control.CompilerConfiguration
@@ -17,6 +18,8 @@ class GroovyInterpreter {
             import static com.brunodles.tablebuilder.ColumnDirection.*
             import static com.brunodles.tablebuilder.FormatDefault.*
             import com.brunodles.tablebuilder.FormatDefault
+            import static com.brunodles.tablebuilder.FormatDefaultImplementation.*
+            import com.brunodles.tablebuilder.FormatDefaultImplementation
             import static com.brunodles.groovy.FormatFunctions.*
             import static com.brunodles.groovy.ExtensionFunctions.*
             import static java.lang.Math.*
@@ -26,7 +29,7 @@ class GroovyInterpreter {
 
     private def scriptResult
 
-    private FormatDefault presentationFormat = FormatDefault.valueOf("simple")
+    private Format presentationFormat = FormatDefaultImplementation.Simple.INSTANCE
     private String workingDir = "./"
 
     GroovyInterpreter() {
@@ -49,7 +52,33 @@ class GroovyInterpreter {
         shell.setVariable("params", MyProxy.create(params))
         shell.setVariable("database", { -> database() })
         shell.setVariable("workingDir", { newPath -> workingDir = newPath })
-        shell.setVariable("format", { newFormat -> presentationFormat = FormatDefault.valueOf(newFormat.toString()) })
+        shell.setVariable("format", { newFormat ->
+            presentationFormat = first(
+                    {
+                        if (newFormat instanceof Format)
+                            return newFormat as Format
+                        else if (newFormat instanceof Class<FormatDefaultImplementation>)
+                            return newFormat.INSTANCE
+                        else if (newFormat instanceof FormatDefaultImplementation)
+                            return newFormat
+                        else
+                            return null
+                    },
+                    {
+                        if (newFormat instanceof String)
+                            return tryOrNull { FormatDefaultImplementation.valueOf(newFormat) } ?:
+                                    tryOrNull { FormatDefault.valueOf(newFormat.toString()) }
+                        else
+                            return null
+                    },
+                    { FormatDefaultImplementation.valueOf(newFormat.toString()) },
+                    { FormatDefault.valueOf(newFormat.toString()) },
+                    {
+                        println "Failed to find format \"${newFormat.toString()}\". Defaulting to 'simple'."
+                        FormatDefaultImplementation.Simple.INSTANCE
+                    }
+            )
+        })
 
         def file = new File(args.first())
         def fileContent = file
@@ -77,7 +106,7 @@ class GroovyInterpreter {
                 resultList.collect { record ->
                     if (record == null)
                         return null
-                    (record.nameList ?: (0..record.size()).collect{ "col-$it"})
+                (record.nameList ?: (0..record.size()).collect { "col-$it" })
                         .withIndex().collectEntries { name, index ->
                         def direction
                         if (record[index].toString().isNumber())
@@ -110,12 +139,12 @@ class GroovyInterpreter {
 //        new File("./")
         new File(workingDir)
             .eachFileRecurse { file -> if (file.isFile()) databaseFileList.add(file) }
-        return databaseFileList.collect {file ->
+        return databaseFileList.collect { file ->
             first(
                 { file.readCsv() },
                 { List.of(file.readJson()) },
                 { List.of(file.readYaml()) }
-            ) ?: List.of()
+            ) ?: Collections.emptyList()
         }.flatten()
     }
 
