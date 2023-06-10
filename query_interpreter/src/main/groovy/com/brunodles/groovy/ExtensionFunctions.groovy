@@ -33,7 +33,13 @@ class ExtensionFunctions {
         }
         File.metaClass.readCsv = { ->
             if ((delegate as File).absolutePath.endsWith('.csv')) {
-                return readCharacterSeparatedValueFile(delegate as File, ",")
+                return readCharacterSeparatedValueFile(delegate as File, ",", "csv")
+            }
+            return null
+        }
+        File.metaClass.readTsv = { ->
+            if ((delegate as File).absolutePath.endsWith('.tsv')) {
+                return readCharacterSeparatedValueFile(delegate as File, "\t", "tsv")
             }
             return null
         }
@@ -44,32 +50,33 @@ class ExtensionFunctions {
         }
     }
 
-    static def readCharacterSeparatedValueFile(File file, String separator) {
+    static def readCharacterSeparatedValueFile(File file, String separator, String format) {
         List<String> lines = file.readLines()
         List<Tuple2<String, Integer>> headers = lines.first()
-            .split(separator)
-            .collect { it.trim() }
-            .withIndex()
+                .split(separator)
+                .collect { it.trim() }
+                .withIndex()
         List<Object> content = lines.drop(1)
-            .findAll {line -> !line.trim().isEmpty()}
-            .collect { line ->
-                List<String> row = line.split(separator)
-                Map<String, Object> content = headers.collectEntries {name, index ->
-                    [name, row[index]]
+                .findAll { line -> !line.trim().isEmpty() }
+                .collect { line ->
+                    List<String> row = line.split(separator)
+                    Map<String, Object> content = headers.collectEntries { name, index ->
+                        [name, row[index]]
+                    }
+                    def result = MyProxy.create(content)
+                    result.putExtraProperty("__sourceType", format)
+                    result.putExtraProperty("__sourceFile", file)
+                    return result
                 }
-                def result = MyProxy.create(content)
-                result.putExtraProperty("__sourceType", "csv")
-                result.putExtraProperty("__sourceFile", file)
-                return result
-            }
         return content
     }
 
     static <T> T first(Closure<T>... closures) {
         for (final def closure in closures) {
             def result = tryOrNull { closure() }
-            if (result != null)
+            if (result != null) {
                 return result
+            }
         }
         return null
     }
